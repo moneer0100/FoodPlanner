@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">FoodTestPlanner</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    //Headers
+    <string name="heading_one">Discover Delicious Options</string>
+    <string name="heading_two">Preparing Meals in Advance</string>
+    //descriptions
+    <string name="desc_one">Explore an array of delightful dishes tailored to your tastes and preferences.</string>
+    <string name="desc_two">Effortlessly plan and prepare your meals ahead of time.</string>
+    <string name="searchbymeall">search by meal</string>
+</resources>

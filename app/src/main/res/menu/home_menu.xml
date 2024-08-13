@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/randomFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/home"
+        android:title="Home"
+        />
+    <item
+        android:id="@+id/searchFragment"
+        android:icon="@drawable/search"
+        android:title="Search"
+        />
+    <item
+        android:id="@+id/favFragment"
+        android:title="Favorite"
+        android:icon="@drawable/baseline_favorite_24"
+        />
+
+    <item
+        android:id="@+id/calenderFragment"
+        android:title="Calender"
+        android:icon="@drawable/calender"/>
+
+
+</menu>
+
+
+

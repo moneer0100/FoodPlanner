@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/randomFragment">
+
+    <fragment
+        android:id="@+id/randomFragment"
+        android:name="com.example.foodtestplanner.home.view.RandomFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_random" >
+        <action
+            android:id="@+id/action_randomFragment_to_mealDetails"
+            app:destination="@id/mealDetails" />
+        <action
+            android:id="@+id/action_randomFragment_to_categoryFragment"
+            app:destination="@id/categoryFragment" />
+        <action
+            android:id="@+id/action_randomFragment_to_listDetailsFragment"
+            app:destination="@id/listDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/mealDetails"
+        android:name="com.example.foodtestplanner.mealDetails.view.MealDetails"
+        android:label="Meal Details"
+        tools:layout="@layout/fragment_meal_details" />
+    <fragment
+        android:id="@+id/categoryFragment"
+        android:name="com.example.foodtestplanner.category.view.CategoryFragment"
+        android:label="Category"
+        tools:layout="@layout/fragment_category" >
+        <action
+            android:id="@+id/action_categoryFragment_to_listDetailsFragment"
+            app:destination="@id/listDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/listDetailsFragment"
+        android:name="com.example.foodtestplanner.listDetails.view.ListDetailsFragment"
+        android:label="List Details"
+        tools:layout="@layout/fragment_list_details" />
+    <fragment
+        android:id="@+id/favFragment"
+        android:name="com.example.foodtestplanner.favourite.view.FavFragment"
+        android:label="Favourit"
+        tools:layout="@layout/fragment_fav" >
+        <action
+            android:id="@+id/action_favFragment_to_listDetailsFragment"
+            app:destination="@id/listDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/calenderFragment"
+        android:name="com.example.foodtestplanner.calenderWeekPlan.CalenderFragment"
+        android:label="Calender"
+        tools:layout="@layout/fragment_calender">
+        <action
+            android:id="@+id/action_calenderFragment_to_listDetailsFragment"
+            app:destination="@id/listDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/ingridentDetailsFragment"
+        android:name="com.example.foodtestplanner.ingrident.IngridentDetailsFragment"
+        android:label="ingrident list"
+        tools:layout="@layout/fragment_ingrident_details">
+        <action
+            android:id="@+id/action_ingridentDetailsFragment_to_listDetailsFragment"
+            app:destination="@id/listDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/searchByNameFragment"
+        android:name="com.example.foodtestplanner.searchByName.view.SearchByNameFragment"
+        android:label="Search By Name"
+        tools:layout="@layout/fragment_search_by_name">
+        <action
+            android:id="@+id/action_searchByNameFragment_to_listDetailsFragment"
+            app:destination="@id/listDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.example.foodtestplanner.search.SearchFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_search">
+        <action
+            android:id="@+id/action_searchFragment_to_ingridentDetailsFragment"
+            app:destination="@id/ingridentDetailsFragment" />
+        <action
+            android:id="@+id/action_searchFragment_to_searchByNameFragment"
+            app:destination="@id/searchByNameFragment" />
+        <action
+            android:id="@+id/action_searchFragment_to_areaDetailsFragment"
+            app:destination="@id/areaDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/areaDetailsFragment"
+        android:name="com.example.foodtestplanner.country.view.AreaDetailsFragment"
+        android:label="Area List"
+        tools:layout="@layout/fragment_area_details" >
+        <action
+            android:id="@+id/action_areaDetailsFragment_to_listDetailsFragment"
+            app:destination="@id/listDetailsFragment" />
+    </fragment>
+</navigation>
