@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -19,6 +20,7 @@ import com.example.foodtestplanner.R;
 import com.example.foodtestplanner.calenderWeekPlan.presenter.CalenderPresenterView;
 import com.example.foodtestplanner.model.dto.WeekPlan;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -31,23 +33,22 @@ public class CalenderAdapter extends RecyclerView.Adapter<CalenderAdapter.ViewHo
     private ImageView removeFromWeekPlanImage;
     private CalenderPresenterView weekPlanMealPresenterView;
 
-    public CalenderAdapter(Context context, List<WeekPlan> weekPlanListMealList, CalenderInClick onWeekPlanMealClickListener, ImageView removeFromWeekPlanImage, CalenderPresenterView weekPlanMealPresenterView) {
+    public CalenderAdapter(Context context, List<WeekPlan> weekPlanListMealList, CalenderInClick onWeekPlanMealClickListener, CalenderPresenterView weekPlanMealPresenterView) {
         this.context = context;
         this.weekPlanListMealList = weekPlanListMealList;
         this.onWeekPlanMealClickListener = onWeekPlanMealClickListener;
-        this.removeFromWeekPlanImage = removeFromWeekPlanImage;
         this.weekPlanMealPresenterView = weekPlanMealPresenterView;
     }
 
     public void setWeekPlanListMealList(List<WeekPlan> weekPlanListMealList) {
         this.weekPlanListMealList = weekPlanListMealList;
-        notifyDataSetChanged();
+//        notifyDataSetChanged();
 
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public CalenderAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View view = layoutInflater.inflate(R.layout.calender_layout, parent, false);
         context = parent.getContext();

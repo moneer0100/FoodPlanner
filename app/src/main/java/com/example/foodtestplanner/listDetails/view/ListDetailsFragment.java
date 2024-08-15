@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.foodtestplanner.R;
+import com.example.foodtestplanner.home.view.Home;
 import com.example.foodtestplanner.listDetails.presenter.ListDetailsImp;
 import com.example.foodtestplanner.listDetails.presenter.ListDetailspresenter;
 import com.example.foodtestplanner.model.network.Repo.MealRepositoryImpl;
@@ -66,7 +67,7 @@ public class ListDetailsFragment extends Fragment implements ListMealView, OnLis
     private WeekPlan weekPlanMeal;
     private Context context;
     private MealsItem mealsItem;
-
+        Home home;
     private RecyclerView recyclerView;
     private Single<MealsDetailResponse> mealsDetailList;
     MealsDetail mealsItems;
@@ -150,11 +151,20 @@ public class ListDetailsFragment extends Fragment implements ListMealView, OnLis
                     listDetailsAdapter.setMealsItemList(GeneratingListIngridentsArrayLists.getIngridentsListArray(mealsDetail));
 
                     addToFavImage.setOnClickListener(v -> {
-                        listDetailspresenter.addToFavDetails(mealsDetail);
-                        Toast.makeText(requireContext(), "u are add to fav", Toast.LENGTH_SHORT).show();
-                    });
+                        final boolean isGuestMode = false;
+                        if (home != null && home.isGuestMode) {
+                            home.showGuestModeAlert();
+                        }else {
+                            listDetailspresenter.addToFavDetails(mealsDetail);
+                            Toast.makeText(requireContext(), "u are add to fav", Toast.LENGTH_SHORT).show();
+                            Log.d("details", "onViewCreated: "+mealsDetail.getStrCategory());
+                        }});
 
                     calender.setOnClickListener(view1 -> {
+                        final boolean isGuestMode = false;
+                        if (home != null && home.isGuestMode) {
+                            home.showGuestModeAlert();
+                        }else{
                         Calendar calendar = Calendar.getInstance();
                         int year = calendar.get(Calendar.YEAR);
                         int month = calendar.get(Calendar.MONTH);
@@ -181,7 +191,7 @@ public class ListDetailsFragment extends Fragment implements ListMealView, OnLis
                             }
                         }, year, month, dayOfMonth);
                         datePickerDialog.show();
-                    });
+                    } });
 
                     String youtubeVideoId = mealsDetail.getStrYoutube();
                     if (youtubeVideoId != null && !youtubeVideoId.isEmpty()) {

@@ -8,11 +8,16 @@ import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
-@Entity(tableName = "meals")
+@Entity(tableName = "MEALS")
 public class MealsItem implements Serializable {
     @Ignore
     @SerializedName("strImageSource")
     private Object strImageSource;
+    @PrimaryKey
+    @NonNull
+    @SerializedName("idMeal")
+    private String idMeal;
+
 
     @SerializedName("strIngredient12")
     private String strIngredient12;
@@ -56,10 +61,6 @@ public class MealsItem implements Serializable {
     @Ignore
     @SerializedName("strTags")
     private Object strTags;
-    @PrimaryKey
-    @NonNull
-    @SerializedName("idMeal")
-    private String idMeal;
 
     @SerializedName("strInstructions")
     private String strInstructions;

@@ -9,4 +9,7 @@
     <string name="desc_one">Explore an array of delightful dishes tailored to your tastes and preferences.</string>
     <string name="desc_two">Effortlessly plan and prepare your meals ahead of time.</string>
     <string name="searchbymeall">search by meal</string>
+    <string name="client_id">424610421377-rpl75cng6du60cg2qjt8eukjacs3pnbs.apps.googleusercontent.com</string>
+    <string name="default_web_client_id">default_web_client_id</string>
+
 </resources>

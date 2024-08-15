@@ -13,6 +13,10 @@ public class MealsDetail implements Serializable {
     @Ignore
     @SerializedName("strImageSource")
     private Object strImageSource;
+    @PrimaryKey
+    @NonNull
+    @SerializedName("idMeal")
+    private String idMeal;
 
     @SerializedName("strIngredient10")
     private String strIngredient10;
@@ -207,10 +211,7 @@ public class MealsDetail implements Serializable {
 
     @SerializedName("strTags")
     private String strTags;
-    @PrimaryKey
-    @NonNull
-    @SerializedName("idMeal")
-    private String idMeal;
+
 
     @SerializedName("strInstructions")
     private String strInstructions;

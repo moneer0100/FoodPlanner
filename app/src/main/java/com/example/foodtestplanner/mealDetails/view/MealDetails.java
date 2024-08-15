@@ -43,7 +43,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 public class MealDetails extends Fragment implements MealDetailsView  {
@@ -58,7 +60,7 @@ public class MealDetails extends Fragment implements MealDetailsView  {
     private ImageView addToFavImage;
     private ListDetailspresenter listDetailPresenterView ;
     private MealsDetail mealsDetail;
-
+    private Home homeActivity;
 
     private RecyclerView recyclerView;
     private Single<MealsDetailResponse> mealsDetailList;
@@ -69,13 +71,13 @@ public class MealDetails extends Fragment implements MealDetailsView  {
     MealDetailsAdapter mealDetailsAdapter;
     MealDetailsPresenter mealDetailsPresenter;
     MealRepositoryImpl mealRepository;
-Home home;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getActivity() != null) {
-            home = (Home) getActivity();
+            homeActivity = (Home) getActivity();
         }
 
     }
@@ -84,7 +86,7 @@ Home home;
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof Home) {
-            home = (Home) context;
+            homeActivity = (Home) context;
         } else {
             throw new RuntimeException(context.toString() + " must implement Home interface");
         }
@@ -93,14 +95,7 @@ Home home;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_meal_details, container, false);
-
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        View view = inflater.inflate(R.layout.fragment_meal_details, container, false);
         image = view.findViewById(R.id.imag_meal_id);
         tvItemCountry = view.findViewById(R.id.Meal_id);
         tvItemCategory = view.findViewById(R.id.country_lid);
@@ -112,51 +107,71 @@ Home home;
         mealsItem = (MealsItem) getArguments().getSerializable("item");
 
         linearLayoutManager = new LinearLayoutManager(getContext()
-         , LinearLayoutManager.HORIZONTAL,false);
+                , LinearLayoutManager.HORIZONTAL,false);
 
         recyclerView.setLayoutManager(linearLayoutManager);
         mealDetailsAdapter = new MealDetailsAdapter(getContext(), new ArrayList<>());
         recyclerView.setAdapter(mealDetailsAdapter);
 
-
+        if (getArguments() != null) {
+            mealsItem = (MealsItem) getArguments().getSerializable("item");
+        }
 
         mealDetailsPresenter = new MealDetailsImp(this, MealRepositoryImpl.getInstance(
                 MealRemotDataSourceImp.getInstance(), MealLocalDataSourceImpl.getInstance(requireActivity())
         ));
-        addToFavImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mealDetailsPresenter.addToFav(mealsItem);
-                Log.d("TAG", "favclick: " );
+        addToFavImage.setOnClickListener(v -> {
+            if (homeActivity != null && homeActivity.isGuestMode) {
+                homeActivity.showGuestModeAlert();
+            } else {
+                mealDetailsPresenter.addToFav(mealsItem)
+
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(() -> {
+                            Log.d("fav", "Favorite added: " + mealsItem.getStrCategory());
+                        }, throwable -> {
+                            Log.e("fav", "Failed to add to favorites", throwable);
+                            showItemDetailErrorMsg("Failed to add to favorites");
+                        });
+                mealDetailsPresenter.insertMealRemoteToFavorite(mealsItem);
+                Log.d("fav", "Favorite remote: " + mealsItem.getStrCategory());
             }
         });
         calender.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                final boolean isGuestMode = false;
+                if (homeActivity != null && homeActivity.isGuestMode) {
+                    homeActivity.showGuestModeAlert();
 
-                Calendar calendar = Calendar.getInstance();
-                int year = calendar.get(Calendar.YEAR);
-                int month = calendar.get(Calendar.MONTH);
-                int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-                DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(), new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                }else{
+                    Calendar calendar = Calendar.getInstance();
+                    int year = calendar.get(Calendar.YEAR);
+                    int month = calendar.get(Calendar.MONTH);
+                    int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+                    DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(), new DatePickerDialog.OnDateSetListener() {
+                        @Override
+                        public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
 
-                        String date = getDateString(year, month, dayOfMonth);
-                        mealsItem = (MealsItem) getArguments().getSerializable("item");
-                        WeekPlan weekPlan = new WeekPlan();
-                        weekPlan.setDate(date);
-                        weekPlan.setMealData(mealsItem);
-                        addToCalendar(weekPlan);
-                    }
+                            String date = getDateString(year, month, dayOfMonth);
+                            mealsItem = (MealsItem) getArguments().getSerializable("item");
+                            WeekPlan weekPlan = new WeekPlan();
+                            weekPlan.setDate(date);
+                            weekPlan.setMealData(mealsItem);
+                            addToCalendar(weekPlan);
+                        }
 
-                    private void addToCalendar(WeekPlan date) {
-                        mealDetailsPresenter.SetClickedItemData(date);
-                        // date.setDate(selectedDate);
-                    }
-                }, year, month, dayOfMonth);
-                datePickerDialog.show();
-            }
+                        private void addToCalendar(WeekPlan date) {
+                            mealDetailsPresenter.SetClickedItemData(date);
+//                        mealDetailsPresenter.insertMealRemoteToWeekPlan(date);
+                            // mealDetailsPresenter.insertMealRemoteToWeekPlan(date);
+                            Log.d("calender", "onClick: "+date.getStrCategory());
+                            // date.setDate(selectedDate);
+                        }
+                    }, year, month, dayOfMonth);
+                    datePickerDialog.show();
+                }}
         });
 
         youTubePlayerView.addYouTubePlayerListener(new AbstractYouTubePlayerListener() {
@@ -184,6 +199,116 @@ Home home;
 
 
 
+        return view;
+
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+//        image = view.findViewById(R.id.imag_meal_id);
+//        tvItemCountry = view.findViewById(R.id.Meal_id);
+//        tvItemCategory = view.findViewById(R.id.country_lid);
+//        description = view.findViewById(R.id.text_meal_description);
+//        calender = view.findViewById(R.id.calender);
+//        addToFavImage = view.findViewById(R.id.fac_list_imag_id);
+//        youTubePlayerView = view.findViewById(R.id.vedioId_meal);
+//        recyclerView = view.findViewById(R.id.recyviewmealidc);
+//        mealsItem = (MealsItem) getArguments().getSerializable("item");
+//
+//        linearLayoutManager = new LinearLayoutManager(getContext()
+//         , LinearLayoutManager.HORIZONTAL,false);
+//
+//        recyclerView.setLayoutManager(linearLayoutManager);
+//        mealDetailsAdapter = new MealDetailsAdapter(getContext(), new ArrayList<>());
+//        recyclerView.setAdapter(mealDetailsAdapter);
+//
+//        if (getArguments() != null) {
+//            mealsItem = (MealsItem) getArguments().getSerializable("item");
+//        }
+//
+//        mealDetailsPresenter = new MealDetailsImp(this, MealRepositoryImpl.getInstance(
+//                MealRemotDataSourceImp.getInstance(), MealLocalDataSourceImpl.getInstance(requireActivity())
+//        ));
+//        addToFavImage.setOnClickListener(v -> {
+//            if (homeActivity != null && homeActivity.isGuestMode) {
+//                homeActivity.showGuestModeAlert();
+//            } else {
+//                mealDetailsPresenter.addToFav(mealsItem)
+//
+//                        .subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .subscribe(() -> {
+//                            Log.d("fav", "Favorite added: " + mealsItem.getStrCategory());
+//                        }, throwable -> {
+//                            Log.e("fav", "Failed to add to favorites", throwable);
+//                            showItemDetailErrorMsg("Failed to add to favorites");
+//                        });
+//                mealDetailsPresenter.insertMealRemoteToFavorite(mealsItem);
+//                Log.d("fav", "Favorite remote: " + mealsItem.getStrCategory());
+//            }
+//        });
+//        calender.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                final boolean isGuestMode = false;
+//                if (homeActivity != null && homeActivity.isGuestMode) {
+//                    homeActivity.showGuestModeAlert();
+//
+//                }else{
+//                Calendar calendar = Calendar.getInstance();
+//                int year = calendar.get(Calendar.YEAR);
+//                int month = calendar.get(Calendar.MONTH);
+//                int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+//                DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(), new DatePickerDialog.OnDateSetListener() {
+//                    @Override
+//                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+//
+//                        String date = getDateString(year, month, dayOfMonth);
+//                        mealsItem = (MealsItem) getArguments().getSerializable("item");
+//                        WeekPlan weekPlan = new WeekPlan();
+//                        weekPlan.setDate(date);
+//                        weekPlan.setMealData(mealsItem);
+//                        addToCalendar(weekPlan);
+//                    }
+//
+//                    private void addToCalendar(WeekPlan date) {
+//                        mealDetailsPresenter.SetClickedItemData(date);
+////                        mealDetailsPresenter.insertMealRemoteToWeekPlan(date);
+//                       // mealDetailsPresenter.insertMealRemoteToWeekPlan(date);
+//                        Log.d("calender", "onClick: "+date.getStrCategory());
+//                        // date.setDate(selectedDate);
+//                    }
+//                }, year, month, dayOfMonth);
+//                datePickerDialog.show();
+//            }}
+//        });
+//
+//        youTubePlayerView.addYouTubePlayerListener(new AbstractYouTubePlayerListener() {
+//            @Override
+//            public void onReady(@NonNull YouTubePlayer youTubePlayer) {
+//                super.onReady(youTubePlayer);
+//                loadVideo(youTubePlayer);
+//            }
+//        });
+//
+//
+//
+//
+//        // Load YouTube video
+//        youTubePlayerView.addYouTubePlayerListener(new AbstractYouTubePlayerListener() {
+//            @Override
+//            public void onReady(@NonNull YouTubePlayer youTubePlayer) {
+//                super.onReady(youTubePlayer);
+//                loadVideo(youTubePlayer);
+//            }
+//        });
+//
+//
+//        showItemDetailData(mealsItem);
+//
+
+
     }
     @Override
     public void onPause() {
@@ -206,7 +331,7 @@ Home home;
     @Override
     public void addToFav(MealsItem mealsItem) {
         mealRepositoryView.insertMealToFavorite(mealsItem);
-        Log.i("moneer", "addToFav: ");
+        Log.i("moneer", "addToFav: " + mealRepositoryView);
     }
 
 
@@ -237,4 +362,5 @@ Home home;
         }
         return videoId;
     }
+
 }

@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
@@ -17,9 +18,14 @@ import android.widget.CalendarView;
 import android.widget.Toast;
 
 import com.example.foodtestplanner.R;
+import com.example.foodtestplanner.calenderWeekPlan.presenter.CalenderPresenterImp;
 import com.example.foodtestplanner.calenderWeekPlan.presenter.CalenderPresenterView;
 import com.example.foodtestplanner.model.dto.WeekPlan;
+import com.example.foodtestplanner.model.network.Repo.MealRepositoryImpl;
+import com.example.foodtestplanner.model.network.db.MealLocalDataSourceImpl;
+import com.example.foodtestplanner.model.network.network.MealRemotDataSourceImp;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -59,9 +65,37 @@ public class CalenderFragment extends Fragment implements CalenderInClick,Calend
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        calendarView = view.findViewById(R.id.calendarView);
+        calendar = Calendar.getInstance();
+        calendarView.setDate(calendar.getTimeInMillis());
+        calendarView.setFirstDayOfWeek(Calendar.SUNDAY);
+
+
+        weekPlanMealPresenterView = new CalenderPresenterImp(this, MealRepositoryImpl.getInstance(MealRemotDataSourceImp.getInstance()
+                , MealLocalDataSourceImpl.getInstance(requireActivity())));
+
+        recyclerView = view.findViewById(R.id.weekPlanRecyclerView);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(requireActivity(), 2);
+        recyclerView.setLayoutManager(gridLayoutManager);
+
+        weekPlanMealAdapter = new CalenderAdapter(requireActivity()
+                ,new ArrayList<>(),this,weekPlanMealPresenterView);
+        recyclerView.setAdapter(weekPlanMealAdapter);
+
+        showList();
+        calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+            @Override
+            public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
+                calendar.set(year, month, dayOfMonth);
+                String selectedDate = getStringFromDate(calendar.getTime());
+                getMealsForDate(selectedDate);
+                Log.i("TAG", "onSelectedDayChange: "+selectedDate);
+            }
+        });
 
     }
     private void getMealsForDate(String selectedDate) {
+
 
         weekPlanMealPresenterView.getMealsForDate(selectedDate)
                 .subscribeOn(Schedulers.io())
@@ -109,11 +143,12 @@ public class CalenderFragment extends Fragment implements CalenderInClick,Calend
     @Override
     public void showList() {
         weekPlanMealList = weekPlanMealPresenterView.getWeekPlanMealList();
-        Log.i("TAG", "showList: "+weekPlanMealList);
+        Log.i("showdata", "showList: "+weekPlanMealList);
         weekPlanMealList.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(weekPlanItemList -> {
                     weekPlanMealAdapter.setWeekPlanListMealList(weekPlanItemList);
+                    Log.d("showdata", "showList: ");
                     weekPlanMealAdapter.notifyDataSetChanged();
                 }, throwable -> {
                     Log.i("TAG", "Unable to show Meal because: "+throwable.getMessage());

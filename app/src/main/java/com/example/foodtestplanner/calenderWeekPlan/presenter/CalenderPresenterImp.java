@@ -1,5 +1,7 @@
 package com.example.foodtestplanner.calenderWeekPlan.presenter;
 
+import android.util.Log;
+
 import com.example.foodtestplanner.calenderWeekPlan.CalenderView;
 import com.example.foodtestplanner.model.network.Repo.MealRepositoryView;
 import com.example.foodtestplanner.model.dto.WeekPlan;
@@ -25,11 +27,13 @@ public class CalenderPresenterImp implements CalenderPresenterView{
 
     @Override
     public void deleteMeal(WeekPlan weekPlan) {
-
+        mealRepositoryView.deleteWeekPlanMealFromCalender(weekPlan);
+        Log.i("TAG", "deleteMeal: Presenter");
     }
 
     @Override
     public Flowable<List<WeekPlan>> getMealsForDate(String date) {
-        return null;
+        return mealRepositoryView.getMealsForDate(date);
+
     }
 }

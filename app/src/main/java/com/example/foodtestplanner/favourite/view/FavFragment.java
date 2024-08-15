@@ -17,6 +17,8 @@ import android.widget.Toast;
 import com.example.foodtestplanner.R;
 import com.example.foodtestplanner.favourite.presenter.FavImp;
 import com.example.foodtestplanner.favourite.presenter.FavPresenter;
+import com.example.foodtestplanner.mealDetails.view.MealDetails;
+import com.example.foodtestplanner.model.dto.MealsDetail;
 import com.example.foodtestplanner.model.network.Repo.MealRepositoryImpl;
 import com.example.foodtestplanner.model.dto.MealsItem;
 import com.example.foodtestplanner.model.network.network.MealRemotDataSourceImp;
@@ -36,6 +38,7 @@ public class FavFragment extends Fragment implements FavView,OnVlickFav{
     private RecyclerView recyclerView;
     private FavAdaptor favMealsAdapter;
     private Flowable<List<MealsItem>> favMealsList;
+    private Flowable<List<MealsDetail>> favDetails;
 
 
     @Override
@@ -58,22 +61,32 @@ public class FavFragment extends Fragment implements FavView,OnVlickFav{
         LinearLayoutManager linearLayoutManager=new LinearLayoutManager(getContext()
         ,LinearLayoutManager.HORIZONTAL,false);
         recyclerView.setLayoutManager(linearLayoutManager);
-        favMealsAdapter=new FavAdaptor(getContext(),new ArrayList<>(),this);
+        favMealsAdapter=new FavAdaptor(getContext(),new ArrayList<>(),new ArrayList<>(),this);
         recyclerView.setAdapter(favMealsAdapter);
 
         favouriteMealPresenterView=new FavImp(MealRepositoryImpl.getInstance(MealRemotDataSourceImp.getInstance()
         , MealLocalDataSourceImpl.getInstance(getContext())),this);
+        showList();
+        showListDetails();
+    }
 
+
+    @Override
+    public void onDeleteItemClick(MealsItem mealsItem) {
+        favouriteMealPresenterView.deleteMeal(mealsItem);
+        Toast.makeText(requireActivity(), "Deleted Successfully", Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void showFavItem(MealsItem mealsItem) {
+    public void showList() {
         favMealsList = favouriteMealPresenterView.getFavMealList();
+        Log.d("moneer", "showList: "+favMealsList);
+
         favMealsList.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(mealsItemList -> {
                     //setFavMealsList(mealsItemList);
-                    favMealsAdapter.setMealsItems(mealsItemList);
+                    favMealsAdapter.setFavMealList(mealsItemList);
                     favMealsAdapter.notifyDataSetChanged();
                 }, throwable -> {
                     Log.i("TAG", "Unable to show Meal because: "+throwable.getMessage());
@@ -81,13 +94,18 @@ public class FavFragment extends Fragment implements FavView,OnVlickFav{
     }
 
     @Override
-    public void showFavERROR(String error) {
-        Toast.makeText(requireActivity(), "no data come ", Toast.LENGTH_SHORT).show();
+    public void showListDetails() {
+        favDetails=favouriteMealPresenterView.getfavDetails();
+        favDetails.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mealsItemLists -> {
+                    //setFavMealsList(mealsItemList);
+                    favMealsAdapter.setFavMeaDetails(mealsItemLists);
+                    favMealsAdapter.notifyDataSetChanged();
+                }, throwable -> {
+                    Log.i("TAG", "Unable to show Meal because: "+throwable.getMessage());
+                });
+
     }
 
-    @Override
-    public void onDeleteItemClick(MealsItem mealsItem) {
-        favouriteMealPresenterView.deleteMeal(mealsItem);
-        Toast.makeText(requireActivity(), "Deleted Successfully", Toast.LENGTH_SHORT).show();
-    }
 }

@@ -28,18 +28,19 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class MealRepositoryImpl implements MealRepositoryView {
     MealRemotDataSourceImp mealRemoteDataSource;
     MealLocalDataSourceImpl mealLocalDataSource;
-    RemoteDatabaseImp remoteDatabaseImp;
+    static RemoteDatabaseImp remoteDatabaseImp;
 
     static MealRepositoryImpl mealRepository;
 
-    public MealRepositoryImpl(MealRemotDataSourceImp mealRemoteDataSource, MealLocalDataSourceImpl mealLocalDataSource) {
+    public MealRepositoryImpl(MealRemotDataSourceImp mealRemoteDataSource, MealLocalDataSourceImpl mealLocalDataSource, RemoteDatabaseImp remoteDatabaseImp) {
         this.mealRemoteDataSource = mealRemoteDataSource;
         this.mealLocalDataSource = mealLocalDataSource;
         this.remoteDatabaseImp = remoteDatabaseImp;
     }
-    public static MealRepositoryImpl getInstance(MealRemotDataSourceImp mealRemoteDataSource,MealLocalDataSourceImpl mealLocalDataSource){
+
+    public static MealRepositoryImpl getInstance(MealRemotDataSourceImp mealRemoteDataSource, MealLocalDataSourceImpl mealLocalDataSource){
         if(mealRepository == null)
-            mealRepository = new MealRepositoryImpl(mealRemoteDataSource,mealLocalDataSource);
+            mealRepository = new MealRepositoryImpl(mealRemoteDataSource,mealLocalDataSource,remoteDatabaseImp);
 
         return  mealRepository;
     }
@@ -70,62 +71,56 @@ public class MealRepositoryImpl implements MealRepositoryView {
     public Single<ListDetailsResponse> CategoryDetailsNetworkCall(String category) {
 
         return mealRemoteDataSource.CategoryDetailsNetworkCall(category)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+           ;
     }
 
     @Override
     public Single<ListDetailsResponse> IngredientDetailsNetworkCall(String category) {
-        return mealRemoteDataSource.IngredientDetailsNetworkCall(category)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        return mealRemoteDataSource.IngredientDetailsNetworkCall(category);
+
     }
 
     @Override
     public Single<ListDetailsResponse> AreaDetailsNetworkCall(String category) {
 
-        return mealRemoteDataSource.AreaDetailsNetworkCall(category)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        return mealRemoteDataSource.AreaDetailsNetworkCall(category);
+
     }
 
     @Override
     public Single<MealsItemResponse> searchByNameNetworkCall(String name) {
 
-        return mealRemoteDataSource.searchByNameNetworkCall(name)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        return mealRemoteDataSource.searchByNameNetworkCall(name);
+
     }
 
     @Override
     public Single<MealsDetailResponse> getMealDetailNetworkCall(String name) {
 
-        return mealRemoteDataSource.getMealDetailNetworkCall(name)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        return mealRemoteDataSource.getMealDetailNetworkCall(name);
+
     }
 
     @Override
     public Completable insertMealToFavoritDetails(MealsDetail mealsItem) {
-        return mealLocalDataSource.insertMealDetailToFavorite(mealsItem)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        Log.d("details", "insertMealToFavoritDetails: "+mealsItem.getStrCategory());
+        return mealLocalDataSource.insertMealDetailToFavorite(mealsItem);
+
     }
 
 
-
-    @Override
-    public void insertWeekPlanMeal(WeekPlan weekPlan) {
-        insertMealRemoteToWeekPlan(weekPlan);
-        mealLocalDataSource.insertWeekPlanMealToCalender(weekPlan);
-    }
+//
+//    @Override
+//    public Completable insertWeekPlanMeal(WeekPlan weekPlan) {
+//        insertMealRemoteToWeekPlan(weekPlan);
+//      return   mealLocalDataSource.insertWeekPlanMealToCalender(weekPlan);
+//    }
 
     @Override
     public Completable insertMealToFavorite(MealsItem mealsItem) {
         Log.i("moneerinsert", mealsItem.getStrCategory());
-        return mealLocalDataSource.insertMealToFavorite(mealsItem)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        return mealLocalDataSource.insertMealToFavorite(mealsItem);
+
     }
 
 
@@ -137,10 +132,22 @@ public class MealRepositoryImpl implements MealRepositoryView {
 
     @Override
     public Flowable<List<MealsItem>> getAllFavoriteStoredMeals() {
+        Log.i("tag", "getAllFavoriteStoredMeals: Method called");
 
         return mealLocalDataSource.getAllFavoriteStoredMeals()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+                .doOnNext(meals -> {
+                    // Log the data retrieved
+                    if (meals.isEmpty()) {
+                        Log.i("tag", "No favorite meals stored.");
+                    } else {
+                        Log.i("tag", "Data retrieved: " + meals.toString());
+                    }
+                })
+                .doOnError(throwable -> {
+                    // Log any errors
+                    Log.e("tag", "Error retrieving data", throwable);
+                });
+
 
     }
 
@@ -152,34 +159,43 @@ public class MealRepositoryImpl implements MealRepositoryView {
        mealLocalDataSource.deleteMealDetailFromFavorite(mealsDetail);
     }
 
-    @Override
-    public Flowable<List<MealsItem>> getFavoriteMeals() {
-        return mealLocalDataSource.getAllFavoriteStoredMeals()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
+
 
     @Override
     public Flowable<List<MealsDetail>> getAllFavoriteStoredMealsDetail() {
         return mealLocalDataSource.getAllFavoriteStoredMealsDetail()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-
+                .doOnNext(mealsdetail -> {
+                    // Log the data retrieved
+                    if (mealsdetail.isEmpty()) {
+                        Log.i("tag", "No favorite mealsdetails stored.");
+                    } else {
+                        Log.i("tag", "Datadetails retrieved: " + mealsdetail.toString());
+                    }
+                })
+                .doOnError(throwable -> {
+                    // Log any errors
+                    Log.e("tag", "Error retrieving data", throwable);
+                });
     }
+
+
+
+
 
     @Override
     public Flowable<List<WeekPlan>> getWeekPlanMeals() {
-        return mealLocalDataSource.getWeekPlanMeals()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        Log.d("showdata", "getWeekPlanMeals: ");
+        return mealLocalDataSource.getWeekPlanMeals();
+
 
     }
 
     @Override
     public Completable insertWeekPlanMealToCalender(WeekPlan weekPlan) {
-        return mealLocalDataSource.insertWeekPlanMealToCalender(weekPlan)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        insertMealRemoteToWeekPlan(weekPlan);
+        Log.d("calender", "insertWeekPlanMealToCalender: "+weekPlan.getStrCategory());
+        return mealLocalDataSource.insertWeekPlanMealToCalender(weekPlan);
+
     }
 
     @Override
@@ -189,46 +205,68 @@ public class MealRepositoryImpl implements MealRepositoryView {
 
     @Override
     public Flowable<List<WeekPlan>> getMealsForDate(String date) {
-        return mealLocalDataSource.getMealsForDate(date)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        Log.d("showdata", "getMealsForDate: ");
+        return mealLocalDataSource.getMealsForDate(date);
+
     }
 
     @Override
     public void deleteAllTheCalenderList() {
-mealLocalDataSource.deleteAllTheCalenderList();
+
+        mealLocalDataSource.deleteAllTheCalenderList();
     }
 
     @Override
     public void deleteAllTheFavoriteList() {
-mealLocalDataSource.deleteAllTheFavoriteList();
+
+        mealLocalDataSource.deleteAllTheFavoriteList();
+    }
+
+
+    //remote
+
+    @Override
+    public Completable insertMealRemoteToFavorite(MealsItem mealsItem) {
+        Log.i("moneer", "insertMealRemoteToFavorite: " + mealsItem.getStrCategory());
+
+        return Completable.fromAction(() -> {
+
+                    remoteDatabaseImp.insertToFavoriteremote(mealsItem);
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+
+
+
+
     }
 
     @Override
-    public void insertMealRemoteToFavorite(MealsItem mealsItem) {
-mealLocalDataSource.deleteMealFromFavorite(mealsItem);
-    }
+    public Completable insertMealRemoteToWeekPlan(WeekPlan weekPlan) {
 
-    @Override
-    public void insertMealRemoteToWeekPlan(WeekPlan weekPlan) {
-mealLocalDataSource.insertWeekPlanMealToCalender(weekPlan);
+      return  Completable.fromAction(() -> {
+
+                  remoteDatabaseImp.insertToWeekPlan(weekPlan);
+              })
+              .subscribeOn(Schedulers.io())
+              .observeOn(AndroidSchedulers.mainThread());
+
+
+
     }
 ///////////////////////////////////////
     @Override
     public void deleteMealRemoteFromFavorite(MealsItem mealsItem) {
-
+        remoteDatabaseImp.deleteFromFavorite(mealsItem);
     }
 
 
 
-    public void deleteMealRemoteFromFavorite(MealsDetail mealsDetail) {
-        mealLocalDataSource.deleteMealDetailFromFavorite(mealsDetail);
 
-    }
 
 
     public void deleteMealRemoteFromWeekPlan(WeekPlan weekPlan) {
-
+        remoteDatabaseImp.deleteFromWeekPlane(weekPlan);
 
     }
 }

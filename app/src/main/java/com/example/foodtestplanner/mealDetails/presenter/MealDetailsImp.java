@@ -1,5 +1,7 @@
 package com.example.foodtestplanner.mealDetails.presenter;
 
+import android.util.Log;
+
 import com.example.foodtestplanner.mealDetails.view.MealDetailsView;
 import com.example.foodtestplanner.model.network.Repo.MealRepositoryView;
 import com.example.foodtestplanner.model.dto.MealsDetailResponse;
@@ -19,17 +21,30 @@ public class MealDetailsImp implements MealDetailsPresenter{
     }
 
     @Override
-    public void SetClickedItemData(WeekPlan selectedDate) {
-        mealRepositoryView.insertWeekPlanMeal(selectedDate);
+    public Completable SetClickedItemData(WeekPlan selectedDate) {
+        return mealRepositoryView.insertWeekPlanMealToCalender(selectedDate);
     }
 
     @Override
     public Completable addToFav(MealsItem mealsItem) {
-      return   mealRepositoryView.insertMealToFavorite(mealsItem);
+        Log.d("Samir", "addToFav: " + mealsItem.getStrCategory());
+        Completable completable = mealRepositoryView.insertMealToFavorite(mealsItem);
+      return   completable;
+
     }
 
     @Override
     public Single<MealsDetailResponse> MEALS_DETAIL_RESPONSE_SINGLE(String category) {
         return mealRepositoryView.getMealDetailNetworkCall(category);
+    }
+
+    @Override
+    public Completable insertMealRemoteToFavorite(MealsItem mealsItem) {
+       return mealRepositoryView.insertMealRemoteToFavorite(mealsItem);
+    }
+
+    @Override
+    public Completable insertMealRemoteToWeekPlan(WeekPlan weekPlan) {
+        return mealRepositoryView.insertMealRemoteToWeekPlan(weekPlan);
     }
 }

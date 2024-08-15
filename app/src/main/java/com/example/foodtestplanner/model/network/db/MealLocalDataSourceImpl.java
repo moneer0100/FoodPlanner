@@ -14,6 +14,7 @@ import java.util.List;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class MealLocalDataSourceImpl implements  MealLocalDataSource{
     private MealDao mealDAO;
@@ -37,69 +38,83 @@ public class MealLocalDataSourceImpl implements  MealLocalDataSource{
     }
     @Override
     public Completable insertMealToFavorite(MealsItem mealsItem) {
-        Log.i("moneer", mealsItem.getStrCategory());
+        Log.i("moneer","add to database"+ mealsItem.getStrCategory());
         return mealDAO.insertMealToFavorite(mealsItem);
     }
 
     @Override
     public void deleteMealFromFavorite(MealsItem mealsItem) {
-        mealDAO.deleteMealFromFavorite(mealsItem);
+        new Thread(() -> {
+            mealDAO.deleteMealFromFavorite(mealsItem);
+        }).start();
     }
 
     @Override
     public Flowable<List<MealsItem>> getAllFavoriteStoredMeals() {
+        Log.d("moneer", "getAllFavoriteStoredMeals: ");
         return storedFavoriteMeals;
     }
 
     @Override
     public Completable insertMealDetailToFavorite(MealsDetail mealsDetail) {
-        Log.i("TAG", "inserting: Adding Item ");
+        Log.i("details1", "inserting: Adding Item "+mealsDetail.getIdMeal());
         return mealDAO.insertMealDetailToFavorite(mealsDetail);
 
     }
 
     @Override
     public void deleteMealDetailFromFavorite(MealsDetail mealsDetail) {
-    mealDAO.deleteMealDetailFromFavorite(mealsDetail);
+        new Thread(() -> {
+            mealDAO.deleteMealDetailFromFavorite(mealsDetail);
+        }).start();
     }
 
     @Override
     public Flowable<List<MealsDetail>> getAllFavoriteStoredMealsDetail() {
+
         return storedFavoriteMealsDetail;
     }
 
     @Override
     public Flowable<List<WeekPlan>> getWeekPlanMeals() {
+        Log.d("back", "getWeekPlanMeals: ");
         return storedWeekPlanMeals;
     }
 
     @Override
     public Completable insertWeekPlanMealToCalender(WeekPlan weekPlan) {
-        Log.i("moneer", "inserting: Adding Item to calender ");
+        Log.i("calender", "inserting: Adding Item to calender ");
         return   mealDAO.insertWeekPlanMealToCalender(weekPlan);
 
     }
 
     @Override
     public void deleteWeekPlanMealFromCalender(WeekPlan weekPlan) {
-        mealDAO.deleteWeekPlanMealFromCalender(weekPlan);
-        Log.i("TAG", "deleting: Removing item from calender ");
+        new Thread(() -> {
+            mealDAO.deleteWeekPlanMealFromCalender(weekPlan);
+            Log.i("TAG", "deleting: Removing item from calender ");
+        }).start();
     }
 
     @Override
     public Flowable<List<WeekPlan>> getMealsForDate(String date) {
-        return  mealDAO.getMealsForDate(date);
+        return mealDAO.getMealsForDate(date);
+
     }
 
     @Override
     public void deleteAllTheCalenderList() {
-        mealDAO.deleteAllTheCalenderList();
-        Log.i("TAG", "Deleting all meals from the calendar list");
+        new Thread(() -> {
+            mealDAO.deleteAllTheCalenderList();
+            Log.i("TAG", "Deleting all meals from the calendar list");
+        }).start();
     }
 
     @Override
     public void deleteAllTheFavoriteList() {
-        mealDAO.deleteAllTheFavoriteList();
-        Log.i("TAG", "Deleting all meals from the favorite list");
+        new Thread(() -> {
+            mealDAO.deleteAllTheFavoriteList();
+            Log.i("TAG", "Deleting all meals from the favorite list");
+        }).start();
     }
 }

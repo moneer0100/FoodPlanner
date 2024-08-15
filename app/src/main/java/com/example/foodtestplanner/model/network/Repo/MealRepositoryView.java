@@ -35,26 +35,23 @@ public interface MealRepositoryView {
     public Single<MealsDetailResponse> getMealDetailNetworkCall(String name);
 
     //Local
+    //insert and delete fav details
     Completable insertMealToFavoritDetails(MealsDetail mealsItem);
-    public Completable insertMealToFavorite(MealsItem mealsItem);
-
-    public void insertWeekPlanMeal(WeekPlan weekPlan);
-    void deleteMealFromFavorite(MealsItem mealsItem);
-
-    Flowable<List<MealsItem>> getAllFavoriteStoredMeals();
-
     void deleteMealDetailFromFavorite(MealsDetail mealsDetail);
-    public Flowable<List<MealsItem>> getFavoriteMeals();
-
     Flowable<List<MealsDetail>> getAllFavoriteStoredMealsDetail();
 
+    //insert and delet fav item
+    public Completable insertMealToFavorite(MealsItem mealsItem);
+    void deleteMealFromFavorite(MealsItem mealsItem);
+    Flowable<List<MealsItem>> getAllFavoriteStoredMeals();
+
+    //insert and delete weekplan
+//    public Completable insertWeekPlanMeal(WeekPlan weekPlan);
     Flowable<List<WeekPlan>> getWeekPlanMeals();
-
     Completable insertWeekPlanMealToCalender(WeekPlan weekPlan);
-
+    public Flowable<List<WeekPlan>> getMealsForDate(String date);
     void deleteWeekPlanMealFromCalender(WeekPlan weekPlan);
 
-    public Flowable<List<WeekPlan>> getMealsForDate(String date);
 
     public void deleteAllTheCalenderList();
 
@@ -63,8 +60,8 @@ public interface MealRepositoryView {
 
 
     //RemoteDB
-    void insertMealRemoteToFavorite(MealsItem mealsItem);
-   void insertMealRemoteToWeekPlan(WeekPlan weekPlan);
+    Completable insertMealRemoteToFavorite(MealsItem mealsItem);
+   Completable insertMealRemoteToWeekPlan(WeekPlan weekPlan);
     void deleteMealRemoteFromFavorite(MealsItem mealsItem);
   // void deleteMealRemoteFromWeekPlan(WeekPlan weekPlan);
 
